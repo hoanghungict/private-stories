@@ -1,0 +1,97 @@
+<div class="card">
+	<div class="card-header">Write a post</div>
+	<div class="card-block">
+      <%= form_tag({action: :create, controller: :posts}, 
+      {class: "dropzone", id: "my-awesome-dropzone",
+      	enctype: "multipart/form-data", remote: true}) do %>
+      <%= token_tag nil %>
+      <textarea class="form-control" placeholder="What's on your mind?" name="post[content]" id="post-content-textarea"></textarea>
+      <button type="submit" class="btn btn-primary float-xs-right mt-1">Post</button>
+      <div class="fallback">
+      <%= file_field_tag "post[image]" %>
+      </div>
+      <% end %>
+      <div style="display: none" id="dropzone-preview">
+      	<div class="dz-preview dz-file-preview">
+				  <div class="dz-details">
+				    <img data-dz-thumbnail />
+				  </div>
+				</div>
+      </div>
+	</div>
+</div>
+<% @posts.each do |post| %>
+<div class="card">
+	<% if !post.image.blank? %>
+	<img class="card-img-top img-fluid" src="<%= post.image %>" alt="Card image cap">
+	<% end %>
+  <div class="card-block">
+    <p class="card-text"><%= post.content %></p>
+    <p>
+    	<ul class="list-group" id="comment-list-<%= post.id %>">
+    		<% post.comments.each do |comment| %>
+    			<li class="list-group-item-info list-group-item py-0"><%= comment.content %></li>
+    		<% end %>
+    	</ul>
+    </p>
+    <p>
+    	<input class="form-control post-comment-input" data-post-id="<%= post.id %>" placeholder="Write a comment">
+    </p>
+  </div>
+  <div class="card-footer text-muted">
+    <%= distance_of_time_in_words(Time.now, post.created_at) %>
+  </div>
+</div>
+<% end %>
+<script>
+$('.post-comment-input').on('keydown', function(e) {
+	if ((e.keyCode || e.which) == 13) {
+		var post_id = $(this).data('post-id');
+		var content = $(this).val();
+		$.post('/comments', {post_id: post_id, content: content}, function(data) {
+				$('#comment-list-' + post_id).append('<li class="list-group-item-info list-group-item py-0">' + content + '</li>');
+		});
+		$(this).val('');
+		return false;
+	}
+});
+$('#my-awesome-dropzone').on("ajax:success", function(e, data, status, xhr) {
+	//$('#message-container').html(data.message);
+	//$('#post-content-textarea').val('');
+	location.reload();
+});
+Dropzone.options.myAwesomeDropzone = {
+	success: function() {
+		location.reload();
+	},
+	init: function() {
+		var myDropzone = this;
+
+    // First change the button to actually tell Dropzone to process the queue.
+    this.element.querySelector("button[type=submit]").addEventListener("click", function(e) {
+    	if (myDropzone.files.length > 0) {
+      	// Make sure that the form isn't actually being sent.
+      	e.preventDefault();
+      	e.stopPropagation();
+      	myDropzone.processQueue();
+      }
+    });
+    this.on("dragover", function(file) { 
+    	$('#my-awesome-dropzone')
+    	.css('border', 'solid 3px yellow')
+    });
+    this.on("dragleave", function(file) { 
+    	$('#my-awesome-dropzone')
+    	.css('border', '')
+    });
+    this.on("drop", function(file) { 
+    	$('#my-awesome-dropzone')
+    	.css('border', '')
+    });
+	},
+	autoProcessQueue: false,
+	dictDefaultMessage: "",
+	paramName: "post[image]",
+	previewTemplate: document.getElementById('dropzone-preview').innerHTML
+}
+</script>
