@@ -1,8 +1,10 @@
 source 'https://rubygems.org'
 ruby '2.3.1'
 
+
 gem 'dropzonejs-rails'
 gem 'carrierwave', '~> 1.0'
+gem "rails-assets-tether"
 
 gem 'rails', '~> 5.0.0', '>= 5.0.0.1'
 gem 'pg'
