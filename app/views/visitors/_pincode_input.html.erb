@@ -1,0 +1,9 @@
+<div class="card">
+  <div class="card-header">Enter pincode</div>
+  <div class="card-block">
+    <%= form_tag({action: :pincode, controller: :visitors}, {class: "form-inline"}) do %>
+    <input autofocus="1" class="form-control" placeholder="Enter pincode" name="pincode" />
+    <button type="submit" class="btn btn-primary">Enter</button>
+    <% end %>
+  </div>
+</div>
